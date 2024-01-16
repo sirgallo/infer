@@ -1,4 +1,4 @@
-import { InferTypeDeep } from '@core/types/Infer'
+import { Infer } from '@infer/Infer';
 
 const test  = {
   "fDXIm": [
@@ -181,6 +181,6 @@ const test  = {
   }
 }
 
-const infer: InferTypeDeep<typeof test> = {
-  ""
+const infer: Infer<typeof test> = {
+
 }

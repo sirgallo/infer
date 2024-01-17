@@ -1,25 +1,33 @@
-type __makeOptional<T, K> = 
-  Omit<T, __inferType<K, false, keyof T>> 
-    & Partial<Pick<T, __inferType<K, false, keyof T>>>;
+type UpdateSubsetTypeAction = 'OPTIONAL' | 'OMIT' | 'PICK';
+type UpdatTypeAction = 'REQUIRE' | 'PARTIAL';
+type InferTypeAction = UpdateSubsetTypeAction | UpdatTypeAction;
 
-type __inferType<T, STRCT = false, TYP = unknown> = 
+type __inferType<T, STRCT = false> = T extends infer R ? R : STRCT extends true ? never : T;
+type __isMappedType<T> = T extends { [K in keyof T]: T[K] } ? true : false;
+type __makeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+type __inferMappedType<T, STRCT = false> = 
   T extends infer R 
-  ? R extends TYP ? R : TYP
-  : STRCT extends true ? never 
-    : T extends TYP ? T : TYP;
-    
-type __inferMappedType<R, STRCT> = { 
-  [K in keyof R]: 
-    R[K] extends infer U
-    ? __inferTypeDeep<U, STRCT> 
-    : __inferType<R[K]>
-}
+  ? { [K in keyof R]: R[K] extends infer U ? __inferType<U, STRCT> : R[K] } 
+  : never;
 
-type __inferTypeDeep<T, STRCT = false, OPTNL = false> =
-  T extends infer SHDOW
-  ? OPTNL extends true
-    ? __makeOptional<__inferMappedType<SHDOW, STRCT>, __inferType<keyof SHDOW, false, keyof SHDOW>>
-    : __inferMappedType<SHDOW, STRCT>
-  : __inferType<T, STRCT>;
+type __inferTypeDeep<T, MUT = unknown, KEYS = unknown, STRCT = false> =
+  T extends infer P
+    ? __isMappedType<P> extends true
+      ? MUT extends UpdateSubsetTypeAction
+        ? KEYS extends keyof __inferMappedType<P>
+          ? MUT extends 'OPTIONAL' ? __makeOptional<__inferMappedType<P>, KEYS>
+          : MUT extends 'OMIT' ? Omit<__inferMappedType<P>, KEYS>
+          : Pick<__inferMappedType<P>, KEYS>
+        : P
+      : MUT extends UpdatTypeAction
+        ? MUT extends 'REQUIRE' ? Required<__inferMappedType<P>>
+        : Partial<__inferMappedType<P>>
+      : never
+    : P
+  : __inferType<T, STRCT>
 
-export type Infer<T, STRCT = false, OPTNL = false> = __inferTypeDeep<T, STRCT, OPTNL>;
+export type InferType<T, MUT extends InferTypeAction = undefined, KEYS extends keyof T = undefined, STRCT extends boolean = false> = 
+  MUT extends UpdatTypeAction ? __inferTypeDeep<T, MUT, unknown, STRCT>
+  : MUT extends UpdateSubsetTypeAction ? __inferTypeDeep<T, MUT, KEYS, STRCT>
+  : __inferTypeDeep<T, unknown, unknown, STRCT>;

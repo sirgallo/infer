@@ -10,12 +10,11 @@ export class App {
 
     const inferTypeofHi: Infer<typeof hi> = 'hi!';
     const inferTest: Infer<typeof test> = 2;
-    const inferNewObj: Infer<typeof newObj> = {
+    const inferNewObj = {
       hi: {
         nestedObject: 1, aBool: true
       }
     }
-
 
     return true;
   }

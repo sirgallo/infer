@@ -19,17 +19,20 @@ The type inference is written using Typescript's type system and performs a deep
 ```ts
 import { Infer } from 'infer';
 
-const hello = { 
-  hi: 1, 
-  world: 'hi',
-  nested: {
-    nested-inside: 'inside'
+
+(() => {
+  const hello = { 
+    hi: 1, 
+    world: 'hi',
+    nested: {
+      nested-inside: 'inside'
+    }
+  };
+
+  
+  const hello1 = hello // type any
+  const inferredHello: Infer<typeof hello> = { // typeof hello
+    //... all fields are available for autocomplete
   }
-};
-
-// type any
-const hello1 = hello;
-
-
-const infer: Infer<typeof hello> 
+})();
 ```
